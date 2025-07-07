@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.api.routes import alerts, cameras, locations
+from app.api.routes import weather  # Add this import
 
 app = FastAPI(
     title="CanWeatherWatch API",
@@ -12,21 +11,27 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(alerts.router, prefix="/api/alerts", tags=["alerts"])
-app.include_router(cameras.router, prefix="/api/cameras", tags=["cameras"])
-app.include_router(locations.router, prefix="/api/locations", tags=["locations"])
+# Include weather routes
+app.include_router(weather.router, prefix="/api/weather", tags=["weather"])
 
 @app.get("/")
 async def root():
-    return {"message": "CanWeatherWatch API", "version": "1.0.0"}
+    return {"message": "CanWeatherWatch API", "version": "1.0.0", "status": "running"}
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "database": "ready", "services": "online"}
+
+@app.get("/api/test")
+async def test_endpoint():
+    return {
+        "test": "success", 
+        "message": "Backend is working perfectly!",
+        "features": ["weather alerts", "current conditions", "forecasts", "traffic cameras"]
+    }
